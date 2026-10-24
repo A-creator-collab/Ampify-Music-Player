@@ -266,7 +266,16 @@ class Database:
                 return cursor.fetchall()
         except:
             return []
-
+    def delete_playlist(self, playlist_id):
+        try:
+            with self.connection.cursor() as cursor:
+                # Because of ON DELETE CASCADE in the schema, this also removes songs from playlist_songs
+                cursor.execute("DELETE FROM playlists WHERE id = %s", (playlist_id,))
+                self.connection.commit()
+                return True
+        except Exception as e:
+            print(f"Error deleting playlist: {e}")
+            return False
     def add_to_favorites(self, user_id, song_id):
         try:
             with self.connection.cursor() as cursor:
@@ -883,7 +892,11 @@ class MusicApp:
                  bg=self.colors['accent'], fg=self.colors['text'], font=("Segoe UI", 11),
                  relief=tk.FLAT, padx=20).pack(side=tk.LEFT, padx=5)
         
-        
+                 
+        # --- ADD THIS NEW BUTTON ---
+        tk.Button(playlist_actions, text="🗑 Delete Selected Playlist", command=self.delete_playlist,
+                 bg=self.colors['hover'], fg=self.colors['text'], font=("Segoe UI", 11),
+                 relief=tk.FLAT, padx=20).pack(side=tk.LEFT, padx=5)
         add_frame = tk.Frame(self.main_content, bg=self.colors['bg'])
         add_frame.pack(fill=tk.X, padx=30, pady=10)
         
@@ -1022,7 +1035,35 @@ class MusicApp:
             self.load_playlists()
         else:
             messagebox.showerror("Error", "Failed to create playlist")
-
+    def delete_playlist(self):
+        selection = self.playlists_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a playlist to delete")
+            return
+            
+        playlist_text = self.playlists_listbox.get(selection[0])
+        if playlist_text == "📁 No playlists yet. Create one!":
+            return
+            
+        playlist_name = playlist_text.replace("📁 ", "")
+        playlist_id = self.playlist_ids.get(playlist_name)
+        
+        if playlist_id:
+            confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete the playlist '{playlist_name}'?\nThis action cannot be undone.")
+            if confirm:
+                if self.db.delete_playlist(playlist_id):
+                    messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted.")
+                    
+                    # If the deleted playlist was currently selected, clear the song list
+                    if self.current_playlist_id == playlist_id:
+                        self.current_playlist_id = None
+                        self.playlist_songs_listbox.delete(0, tk.END)
+                        self.current_playlist_songs = []
+                        self.current_playlist_index = -1
+                        
+                    self.load_playlists() # Refresh the listbox
+                else:
+                    messagebox.showerror("Error", "Failed to delete playlist")
     def add_song_to_playlist(self):
         
         
