@@ -1,4 +1,3 @@
-
 # 🎵 Ampify Music Player
 
 Ampify is a modern desktop music player application built with **Python** and **Tkinter**. It features a clean interface, a robust MySQL backend for managing your music library, and smooth playback powered by **Pygame**.
@@ -15,7 +14,7 @@ Ampify is a modern desktop music player application built with **Python** and **
 
 - **User Authentication** — Secure registration and login using `bcrypt` hashing.
 - **Music Library** — Add, view, and manage your entire song collection.
-- **Playlist Management** — Create custom playlists and add or remove songs.
+- **Playlist Management** — Create, delete, and manage custom playlists with ease.
 - **Favorites** — Mark songs as favorites for quick access.
 - **Song Queue** — View and manage the current playback queue.
 - **Recently Played** — Automatically tracks your listening history.
@@ -42,24 +41,26 @@ Ampify is a modern desktop music player application built with **Python** and **
 
 ## 📚 Data Structures & Algorithms Used
 
-- **Hash Table** — For fast lookups in the song library and user data.
-- **Queue (Deque)** — For managing the song playback queue.
-- **Quick Sort** — For sorting songs by title, artist, or duration.
+Ampify doesn't just use Python lists for everything. It implements custom data structures to manage data efficiently:
+- **Hash Table** — Custom implementation for O(1) fast lookups in the song library and user data.
+- **Queue (Deque)** — `collections.deque` is used to manage the "Up Next" song playback queue.
+- **Stack** — Used to manage the "Recently Played" history.
+- **Quick Sort** — Custom implementation for sorting songs by title, artist, or year.
 - **Linear Search** — For filtering and searching through the library.
 
 ---
 
 ## 🗄️ Database Schema
 
-Ampify uses a MySQL database with the following tables:
+Ampify uses a MySQL database with the following tables (these are automatically created by the app on first launch):
 
 ```sql
 -- Users Table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100)
 );
 
 -- Songs Table
@@ -67,16 +68,18 @@ CREATE TABLE songs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     artist VARCHAR(255),
-    album VARCHAR(255),
-    file_path VARCHAR(500) NOT NULL,
-    duration INT
+    year VARCHAR(10),
+    genre VARCHAR(100),
+    duration INT DEFAULT 0,
+    play_count INT DEFAULT 0,
+    filepath TEXT NOT NULL
 );
 
 -- Playlists Table
 CREATE TABLE playlists (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -84,43 +87,38 @@ CREATE TABLE playlists (
 CREATE TABLE playlist_songs (
     playlist_id INT,
     song_id INT,
-    PRIMARY KEY (playlist_id, song_id),
     FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
 );
 
 -- Favorites Table
 CREATE TABLE favorites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     song_id INT,
-    PRIMARY KEY (user_id, song_id),
+    UNIQUE KEY unique_favorite (user_id, song_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
 );
 ```
-
----
-
-## 🚀 Installation & Setup
+🚀 Installation & Setup
 
 Follow these steps to get Ampify running on your local machine.
+1. Prerequisites
 
-### 1. Prerequisites
+    Python 3.8 or higher — Download here
 
-- **Python 3.8 or higher** — [Download here](https://www.python.org/downloads/)
-- **MySQL Server** — [Download here](https://dev.mysql.com/downloads/installer/)
-- **Git** — [Download here](https://git-scm.com/)
+    MySQL Server — Download here
 
-### 2. Clone the Repository
+2. Clone the Repository
+bash
 
-```bash
 git clone https://github.com/A-creator-collab/Ampify-Music-Player.git
 cd Ampify-Music-Player
-```
 
-### 3. Set Up a Virtual Environment (Recommended)
+3. Set Up a Virtual Environment (Recommended)
+bash
 
-```bash
 # Windows
 python -m venv venv
 venv\Scripts\activate
@@ -128,114 +126,62 @@ venv\Scripts\activate
 # macOS / Linux
 python3 -m venv venv
 source venv/bin/activate
-```
 
-### 4. Install Dependencies
+4. Install Dependencies
+bash
 
-```bash
 pip install -r requirements.txt
-```
 
-### 5. Configure the Database
+5. Configure the Database
 
-1.  Open your MySQL client (e.g., MySQL Workbench, command line).
-2.  Create a new database:
+    Open your MySQL client (e.g., MySQL Workbench, command line).
 
-    ```sql
-    CREATE DATABASE ampify_db;
-    ```
+    The application is configured to automatically create the musicdb database and all required tables on first launch.
 
-3.  Execute the SQL statements from the **Database Schema** section above to create the necessary tables.
-4.  Create a `.env` file in the project root and add your database credentials:
+    Important: Open main.py and update the database credentials in the Database.connect_database() method to match your local MySQL setup:
 
-    ```env
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASSWORD=your_mysql_password
-    DB_NAME=ampify_db
-    ```
+python
 
-### 6. Run the Application
+# Change these lines in main.py
+host="localhost",
+user="root",
+password="12345", # <-- Change to your MySQL password
+database="musicdb",
 
-```bash
+6. Run the Application
+bash
+
 python main.py
-```
 
----
+📁 Project Structure
+text
 
-## 📁 Project Structure
-
-```
 Ampify-Music-Player/
 │
-├── main.py                 # Application entry point
+├── main.py                 # Application entry point (GUI, DB, Logic)
 ├── requirements.txt        # Python dependencies
 ├── README.md               # Project documentation
-│
-├── src/                    # Source code
-│   ├── __init__.py
-│   ├── auth.py             # Authentication logic (bcrypt)
-│   ├── database.py         # MySQL connection and queries
-│   ├── player.py           # Pygame audio playback logic
-│   ├── playlist.py         # Playlist management logic
-│   ├── queue.py            # Song queue management
-│   ├── search.py           # Search and filter functions
-│   ├── sort.py             # Quick sort implementation
-│   └── theme.py            # Dark/Light theme configuration
-│
-├── assets/                 # Icons, images, and styles
-│   ├── icons/
-│   └── styles/
-│
-└── .env                    # Environment variables (not committed)
-```
+└── .gitignore              # Git ignore file
 
-> **Note:** The actual structure may vary slightly. Update this section to match your repository's layout.
+🖥️ Usage
 
----
+    Launch the application by running python main.py.
 
-## 🖥️ Usage
+    Register a new account or log in with your credentials.
 
-1.  **Launch the application** by running `python main.py`.
-2.  **Register** a new account or **log in** with your credentials.
-3.  **Add songs** to your library by providing the file path.
-4.  **Create playlists** and add your favorite tracks.
-5.  Use the **playback controls** to play, pause, skip, and adjust volume.
-6.  Toggle between **Dark and Light themes** from the settings menu.
+    Add songs to your library by providing the file path.
 
----
+    Create playlists and add your favorite tracks. You can also delete playlists you no longer need.
 
-## 🤝 Contributing
+    Use the playback controls to play, pause, skip, adjust volume, and seek.
 
-Contributions are welcome! If you'd like to improve Ampify, please follow these steps:
+    Toggle between Dark and Light themes using the sun/moon icon.
 
-1.  Fork the repository.
-2.  Create a new branch: `git checkout -b feature/your-feature-name`.
-3.  Make your changes and commit them: `git commit -m "Add your feature"`.
-4.  Push to the branch: `git push origin feature/your-feature-name`.
-5.  Open a Pull Request.
+📄 License
 
----
+This project is licensed under the MIT License.
+👨‍💻 Author
 
-## 📄 License
+Atharv Singh
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
-
----
-
-## 👨‍💻 Author
-
-**Atharv Singh**
-
----
-
-## 🙏 Acknowledgements
-
-- [Pygame](https://www.pygame.org/) for audio playback.
-- [Tkinter](https://docs.python.org/3/library/tkinter.html) for the GUI framework.
-- [ttkthemes](https://github.com/TkinterEP/ttkthemes) for modern widget themes.
-- [bcrypt](https://github.com/pyca/bcrypt/) for secure password hashing.
-
----
-
-> ⭐ If you find this project useful, please consider giving it a star on GitHub!
+    GitHub: @A-creator-collab
