@@ -34,7 +34,27 @@ class HashTable:
             if k == key:
                 return v
         return None
+class PlaybackQueue:
+    """Custom queue class for managing the 'Up Next' playlist."""
+    def __init__(self):
+        self._queue = deque()
 
+    def add(self, song):
+        self._queue.append(song)
+
+    def get_next(self):
+        if not self.is_empty():
+            return self._queue.popleft()
+        return None
+
+    def is_empty(self):
+        return len(self._queue) == 0
+
+    def clear(self):
+        self._queue.clear()
+
+    def get_all(self):
+        return list(self._queue)
 
 def quick_sort(arr, key=lambda x: x.get('title', '')):
     if len(arr) <= 1:
@@ -342,7 +362,7 @@ class MusicApp:
         self.song_array = []
         self.song_hash_table = HashTable()
         self.history_stack = []
-        self.up_next_queue = deque()
+        self.queue = PlaybackQueue()
         self.playlist_queue = []  
         
         
@@ -768,8 +788,8 @@ class MusicApp:
             self.current_playlist_index += 1
             self.play_song(self.current_playlist_songs[self.current_playlist_index])
         
-        elif self.up_next_queue:
-            self.play_song(self.up_next_queue.popleft())
+        elif not self.queue.is_empty():
+            self.play_song(self.queue.get_next())
         
         elif self.current_song and self.song_array:
             idx = next((i for i, s in enumerate(self.song_array) if s['id'] == self.current_song['id']), -1)
@@ -793,8 +813,8 @@ class MusicApp:
         if self.current_playlist_songs and self.current_playlist_index < len(self.current_playlist_songs) - 1:
             self.current_playlist_index += 1
             self.play_song(self.current_playlist_songs[self.current_playlist_index])
-        elif self.up_next_queue:
-            self.play_song(self.up_next_queue.popleft())
+        elif not self.queue.is_empty():
+            self.play_song(self.queue.get_next())
         elif self.current_song and self.song_array:
             idx = next((i for i, s in enumerate(self.song_array) if s['id'] == self.current_song['id']), -1)
             if idx < len(self.song_array) - 1:
@@ -816,7 +836,7 @@ class MusicApp:
         song_id = self.tree.item(selected[0])['values'][0]
         song = self.song_hash_table.get(song_id)
         if song:
-            self.up_next_queue.append(song)
+            self.queue.add(song)
             messagebox.showinfo("Added", f"Added '{song['title']}' to queue")
 
     def add_selected_to_favorites(self):
@@ -836,7 +856,7 @@ class MusicApp:
         queue_box = tk.Listbox(self.main_content, font=("Segoe UI", 11), bg=self.colors['card_bg'],
                                fg=self.colors['text'], selectbackground=self.colors['accent'])
         queue_box.pack(fill=tk.BOTH, expand=True, padx=30, pady=20)
-        for i, s in enumerate(self.up_next_queue, 1):
+        for i, s in enumerate(self.queue.get_all(), 1):
             queue_box.insert(tk.END, f"{i}. {s['title']} - {s.get('artist', 'Unknown')}")
 
     def show_history(self):
