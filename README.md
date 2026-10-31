@@ -43,7 +43,7 @@ Ampify is a modern desktop music player application built with **Python** and **
 
 Ampify doesn't just use Python lists for everything. It implements custom data structures to manage data efficiently:
 - **Hash Table** — Custom implementation for O(1) fast lookups in the song library and user data.
-- **Queue (Deque)** — `collections.deque` is used to manage the "Up Next" song playback queue.
+- **Queue (Custom Class)** — Extracted playback queue logic into a dedicated `PlaybackQueue` class for better separation of concerns.
 - **Stack** — Used to manage the "Recently Played" history.
 - **Quick Sort** — Custom implementation for sorting songs by title, artist, or year.
 - **Linear Search** — For filtering and searching through the library.
