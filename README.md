@@ -163,20 +163,31 @@ Ampify-Music-Player/
 ├── README.md               # Project documentation
 └── .gitignore              # Git ignore file
 
-🖥️ Usage
+## 🖥️ Usage Guide
 
-    Launch the application by running python main.py.
+### 1. Getting Started
+When you launch the app, you will see the Login screen. If you are a new user, click **Create Account**. Otherwise, enter your credentials to log in.
 
-    Register a new account or log in with your credentials.
+### 2. Managing Your Library
+- **Adding Songs:** Click the **➕ Add Song** button in the sidebar. Select an `.mp3` file from your computer and fill in the title, artist, year, and genre.
+- **Searching:** Use the search bar at the top of the Library screen. The app uses a custom Hash Table for O(1) exact matches, falling back to Linear Search for partial matches.
+- **Sorting:** Click the **Title**, **Artist**, or **Year** buttons to sort the library using a custom Quick Sort algorithm.
 
-    Add songs to your library by providing the file path.
+### 3. Playback Controls
+- Double-click a song in the library to play it.
+- Use the bottom bar to **Play/Pause**, skip to the **Next/Previous** song, adjust **Volume**, and click the **Progress Bar** to seek.
+- Click the **⭐ Star** on the bottom right to add the current song to your Favorites.
 
-    Create playlists and add your favorite tracks. You can also delete playlists you no longer need.
+### 4. Playlists
+- Go to the **📁 Playlists** tab in the sidebar.
+- Enter a name and click **+ Create Playlist**.
+- Select a playlist from the list, choose a song from the dropdown, and click **Add to Selected Playlist**.
+- You can play the entire playlist by clicking **▶ Play Entire Playlist**.
+- To remove a playlist you no longer need, click **🗑 Delete Selected Playlist**.
 
-    Use the playback controls to play, pause, skip, adjust volume, and seek.
-
-    Toggle between Dark and Light themes using the sun/moon icon.
-
+### 5. Queue & History
+- **Queue:** Right-click any song in the library and select **➕ Add to Queue** (or use the button). You can view your upcoming songs in the **📋 Queue** tab.
+- **History:** Every song you play is tracked in the **📜 History** tab, allowing you to see your listening history.
 📄 License
 
 This project is licensed under the MIT License.
